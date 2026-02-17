@@ -135,9 +135,9 @@ bool ParseCmdLine(int argc, char** argv, void* CmdLine, size_t SizeOfCmdLine, co
 
 	memset(CmdLine, 0, SizeOfCmdLine);
 
-	if (argc == 0)
+	if (argc <= 1) // there should always be one, but just in case the user emits the first arg
 	{
-		return sizeof(CmdLine) == 0;
+		return false;
 	}
 
 	for (int i = 1; i < argc; i++)
