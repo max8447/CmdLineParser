@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdio>
 #include <stddef.h>
 #include <cstring>
 #include <type_traits>
@@ -51,36 +50,39 @@ bool StartsWith(char* String, const char* Pattern)
 template<typename Type>
 void* Parse(char* CmdLineArg, char* OptionalArg)
 {
-	int Base = 10;
-	int ToSkip = 0;
+	if constexpr (std::_Is_nonbool_integral<Type>)
+	{
+		int Base = 10;
+		int ToSkip = 0;
 
-	if (StartsWith(CmdLineArg, "0x"))
-	{
-		Base = 16;
-		ToSkip = 2;
-	}
-	else if (StartsWith(CmdLineArg, "0b"))
-	{
-		Base = 2;
-		ToSkip = 2;
-	}
-	else if (StartsWith(CmdLineArg, "0"))
-	{
-		Base = 8;
-		ToSkip = 1;
-	}
+		if (StartsWith(CmdLineArg, "0x"))
+		{
+			Base = 16;
+			ToSkip = 2;
+		}
+		else if (StartsWith(CmdLineArg, "0b"))
+		{
+			Base = 2;
+			ToSkip = 2;
+		}
+		else if (StartsWith(CmdLineArg, "0"))
+		{
+			Base = 8;
+			ToSkip = 1;
+		}
 
-	if constexpr (std::is_unsigned_v<Type> && std::_Is_nonbool_integral<Type>)
-	{
-		unsigned long long* ReturnValue = new unsigned long long(strtoull(CmdLineArg + ToSkip, nullptr, Base));
+		if constexpr (std::is_unsigned_v<Type>)
+		{
+			unsigned long long* ReturnValue = new unsigned long long(strtoull(CmdLineArg + ToSkip, nullptr, Base));
 
-		return ReturnValue;
-	}
-	else if constexpr (std::is_signed_v<Type> && std::_Is_nonbool_integral<Type>)
-	{
-		long long* ReturnValue = new long long(strtoll(CmdLineArg + ToSkip, nullptr, Base));
+			return ReturnValue;
+		}
+		else if constexpr (std::is_signed_v<Type>)
+		{
+			long long* ReturnValue = new long long(strtoll(CmdLineArg + ToSkip, nullptr, Base));
 
-		return ReturnValue;
+			return ReturnValue;
+		}
 	}
 	else if constexpr (std::is_same_v<Type, bool>)
 	{

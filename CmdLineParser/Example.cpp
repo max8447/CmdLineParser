@@ -1,5 +1,7 @@
 #include "CmdLineParser.h"
 
+#include <cstdio>
+
 int main(int argc, char** argv)
 {
 #define DEFINE_CMDLINE_FIELDS(Define)			\
