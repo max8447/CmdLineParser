@@ -12,17 +12,17 @@ Define(char*, arg3, "-p", true);				\
 Define(float, arg4, "-f", true);
 ```
 
-Parameters:
-Type of the argument
-Name of the argument (the name is arbitrary)
-The flag for which is searched
-Whether or not to use the next argument for the value
+Parameters:<br>
+Type of the argument<br>
+Name of the argument (the name is arbitrary)<br>
+The flag for which is searched<br>
+Whether or not to use the next argument for the value<br>
 
 2. Call the `DEFINE_CMDLINE` macro:
 ```cpp
 DEFINE_CMDLINE();
 ```
 
-See Example.cpp for ready-to-use solution.
+See Example.cpp for a ready-to-use solution.
 
 Any contributions are welcome.
