@@ -1,3 +1,12 @@
+/*
+	CmdLineParser.h - lightweight commandline parser single-header library in C++
+
+	Copyright (c) 2026 Max Müller
+	https://github.com/max8447/CmdLineParser
+
+	MIT License
+*/
+
 #pragma once
 
 #include <stddef.h>
