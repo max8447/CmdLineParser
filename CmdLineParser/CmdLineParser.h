@@ -140,7 +140,7 @@ bool ParseCmdLine(int argc, char** argv, void* CmdLine, size_t SizeOfCmdLine, co
 		return false;
 	}
 
-	for (int i = 1; i < argc; i++)
+	for (int i = 0; i < argc; i++)
 	{
 		char* arg = argv[i];
 
