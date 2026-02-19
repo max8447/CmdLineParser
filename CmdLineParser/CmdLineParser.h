@@ -9,10 +9,11 @@
 
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 #include <cstring>
 #include <type_traits>
 #include <cmath>
+#include <cctype>
 
 #define DEFINE_CMDLINE_ARG(Type, Name, CmdLineArg, bNextValue) \
 Type Name;
@@ -36,6 +37,7 @@ constexpr struct															\
 DEFINE_CMDLINE_FIELDS(DEFINE_TRANSLATOR_ARG);								\
 }Translator{};
 
+// case insensitive
 bool StartsWith(char* String, const char* Pattern)
 {
 	size_t PatternLen = strlen(Pattern);
@@ -47,7 +49,7 @@ bool StartsWith(char* String, const char* Pattern)
 
 	for (int i = 0; i < PatternLen; i++)
 	{
-		if (String[i] != Pattern[i])
+		if (tolower(String[i]) != tolower(Pattern[i]))
 		{
 			return false;
 		}
@@ -105,7 +107,7 @@ void* Parse(char* CmdLineArg, char* OptionalArg)
 	}
 	else if constexpr (std::is_same_v<Type, bool>)
 	{
-		ReturnValue = new bool(!!atoi(CmdLineArg) /* || strstr?? */);
+		ReturnValue = new bool(!!strtol(CmdLineArg, nullptr, 10) /* || strstr?? */);
 
 		if (strcmp(CmdLineArg, OptionalArg) == 0) // for when only a single arg sets it to true (e.g -d)
 		{
@@ -114,11 +116,15 @@ void* Parse(char* CmdLineArg, char* OptionalArg)
 	}
 	else if constexpr (std::is_same_v<Type, float>)
 	{
-		ReturnValue = new float(atof(CmdLineArg));
+		ReturnValue = new float(strtof(CmdLineArg, nullptr));
 	}
 	else if constexpr (std::is_same_v<Type, double>)
 	{
-		ReturnValue = new double(atof(CmdLineArg));
+		ReturnValue = new double(strtod(CmdLineArg, nullptr));
+	}
+	else if constexpr (std::is_same_v<Type, long double>)
+	{
+		ReturnValue = new long double(strtold(CmdLineArg, nullptr));
 	}
 	else if constexpr (std::is_pointer_v<Type>)
 	{
