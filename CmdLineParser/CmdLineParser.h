@@ -56,9 +56,23 @@ bool StartsWith(char* String, const char* Pattern)
 	return true;
 }
 
+wchar_t* NCStrToWCStr(char* NCStr)
+{
+	size_t WCStrLen;
+	mbstowcs_s(&WCStrLen, NULL, 0, NCStr, 0);
+
+	wchar_t* WCStr = new wchar_t[WCStrLen + 1];
+
+	mbstowcs_s(&WCStrLen, WCStr, WCStrLen, NCStr, WCStrLen + 1);
+	
+	return WCStr;
+}
+
 template<typename Type>
 void* Parse(char* CmdLineArg, char* OptionalArg)
 {
+	void* ReturnValue = nullptr;
+
 	if constexpr (std::_Is_nonbool_integral<Type>)
 	{
 		int Base = 10;
@@ -82,48 +96,43 @@ void* Parse(char* CmdLineArg, char* OptionalArg)
 
 		if constexpr (std::is_unsigned_v<Type>)
 		{
-			unsigned long long* ReturnValue = new unsigned long long(strtoull(CmdLineArg + ToSkip, nullptr, Base));
-
-			return ReturnValue;
+			ReturnValue = new unsigned long long(strtoull(CmdLineArg + ToSkip, nullptr, Base));
 		}
 		else if constexpr (std::is_signed_v<Type>)
 		{
-			long long* ReturnValue = new long long(strtoll(CmdLineArg + ToSkip, nullptr, Base));
-
-			return ReturnValue;
+			ReturnValue = new long long(strtoll(CmdLineArg + ToSkip, nullptr, Base));
 		}
 	}
 	else if constexpr (std::is_same_v<Type, bool>)
 	{
-		bool* ReturnValue = new bool(!!atoi(CmdLineArg) /* || strstr?? */);
+		ReturnValue = new bool(!!atoi(CmdLineArg) /* || strstr?? */);
 
 		if (strcmp(CmdLineArg, OptionalArg) == 0) // for when only a single arg sets it to true (e.g -d)
 		{
-			*ReturnValue = true;
+			*(bool*)ReturnValue = true;
 		}
-
-		return ReturnValue;
 	}
 	else if constexpr (std::is_same_v<Type, float>)
 	{
-		float* ReturnValue = new float(atof(CmdLineArg));
-
-		return ReturnValue;
+		ReturnValue = new float(atof(CmdLineArg));
 	}
 	else if constexpr (std::is_same_v<Type, double>)
 	{
-		double* ReturnValue = new double(atof(CmdLineArg));
-
-		return ReturnValue;
+		ReturnValue = new double(atof(CmdLineArg));
 	}
-	else if constexpr (std::is_pointer_v<Type> && std::is_same_v<std::remove_const_t<std::remove_pointer_t<Type>>, char>)
+	else if constexpr (std::is_pointer_v<Type>)
 	{
-		char** ReturnValue = new char*(_strdup(CmdLineArg));
-
-		return ReturnValue;
+		if constexpr (std::is_same_v<std::remove_const_t<std::remove_pointer_t<Type>>, char>)
+		{
+			ReturnValue = new char* (_strdup(CmdLineArg));
+		}
+		else if constexpr (std::is_same_v<std::remove_const_t<std::remove_pointer_t<Type>>, wchar_t>)
+		{
+			ReturnValue = new wchar_t* (NCStrToWCStr(CmdLineArg));
+		}
 	}
 
-	return 0;
+	return ReturnValue;
 }
 
 struct Arg
@@ -172,7 +181,10 @@ bool ParseCmdLine(int argc, char** argv, void* CmdLine, size_t SizeOfCmdLine, co
 
 				void* ParsedArg = (void*)TranslatorArg->Parse(CmdLineArg, arg);
 
-				memcpy((void*)(size_t(CmdLine) + TranslatorArg->Offset), ParsedArg, TranslatorArg->Size);
+				if (ParsedArg)
+				{
+					memcpy((void*)(size_t(CmdLine) + TranslatorArg->Offset), ParsedArg, TranslatorArg->Size);
+				}
 			}
 		}
 	}
