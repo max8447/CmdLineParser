@@ -28,7 +28,7 @@ DEFINE_CMDLINE();
 CmdLine CommandLine;
 ```
 
-4. Call ParseCmdLine function:
+4. Call the `ParseCmdLine` function:
 ```cpp
 bool bSuccess = ParseCmdLine(argc, argv, &CommandLine, sizeof(CmdLine), &Translator, sizeof(Translator);
 ```
