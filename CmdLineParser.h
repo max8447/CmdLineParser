@@ -28,7 +28,7 @@ Arg Name = Arg{														\
 };
 
 #define DEFINE_CMDLINE(CmdLineName)									\
-struct CmdLine														\
+struct CmdLineName##Struct											\
 {																	\
 DEFINE_CMDLINE_FIELDS(DEFINE_CMDLINE_ARG);							\
 }CmdLineName{};														\
