@@ -1,7 +1,0 @@
-<Solution>
-  <Configurations>
-    <Platform Name="x64" />
-    <Platform Name="x86" />
-  </Configurations>
-  <Project Path="CmdLineParser/CmdLineParser.vcxproj" Id="c03b93ac-755d-43fd-9cad-8d7c34646328" />
-</Solution>

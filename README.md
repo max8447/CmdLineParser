@@ -13,37 +13,32 @@ Define(float, arg4, "-f", true);
 ```
 
 Parameters:<br>
-Type of the argument<br>
-Name of the argument (the name is arbitrary)<br>
-The flag for which is searched<br>
-Whether or not to use the next argument for the value<br>
+`Type`: Type of the argument<br>
+`Name`: Name of the argument (the name is arbitrary)<br>
+`CmdLineArg`: The flag for which is searched<br>
+`bNextValue`: Whether or not to use the next argument for the value<br>
 
 2. Call the `DEFINE_CMDLINE` macro:
 ```cpp
-DEFINE_CMDLINE();
-```
-
-3. Define command line variable of type CmdLine:
-```cpp
-CmdLine CommandLine;
-```
-
-4. Call the `ParseCmdLine` function:
-```cpp
-bool bSuccess = ParseCmdLine(argc, argv, &CommandLine, sizeof(CmdLine), &Translator, sizeof(Translator);
+DEFINE_CMDLINE(CommandLine);
 ```
 
 Parameters:<br>
-Number of arguments (passed to main by argc)<br>
-Pointer to arguments (passed to main by argv)<br>
-Pointer to CmdLine variable we just created<br>
-Size of CmdLine<br>
-Pointer to Translator (variable defined by the DEFINE_CMDLINE macro)<br>
-Size of Translator<br>
+`CmdLineName`: Name of the command line object
+
+3. Call the `PARSE_CMDLINE` macro:
+```cpp
+bool bSuccess = PARSE_CMDLINE(CommandLine, argc, argv);
+```
+
+Parameters:<br>
+`CmdLine`: Command line object<br>
+`argc`: Number of arguments (passed to `main` by argc)<br>
+`argv`: Pointer to arguments (passed to `main` by argv)<br>
 
 Return value:<br>
-true on success, false on failure (failures only happen when a commandline arg is flagged to use the next arg as the value but there is no next arg).<br>
+`true` on success, `false` on failure (failures only happen when a commandline arg is flagged to use the next arg as the value but there is no next arg).<br>
 
-See Example.cpp for a ready-to-use solution.
+See [Example.cpp](https://github.com/max8447/CmdLineParser/blob/main/Example.cpp) for a ready-to-use solution.
 
 Any contributions are welcome.

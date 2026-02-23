@@ -10,16 +10,19 @@ Define(bool, arg2, "-e", false);				\
 Define(char*, arg3, "-p", true);				\
 Define(float, arg4, "-f", true);
 
-	DEFINE_CMDLINE();
+	DEFINE_CMDLINE(CmdLine);
 
-	CmdLine CmdLine;
-	if (!ParseCmdLine(argc, argv, &CmdLine, sizeof(CmdLine), &Translator, sizeof(Translator)))
+	if (!PARSE_CMDLINE(CmdLine, argc, argv))
 	{
 		printf("Failed to parse command line!\n");
 		return 1;
 	}
 
-	// use CmdLine here
+	printf("CmdLine:\n");
+	printf("arg1: %d\n", CmdLine.arg1);
+	printf("arg2: %s\n", CmdLine.arg2 ? "true" : "false");
+	printf("arg3: %s\n", CmdLine.arg3);
+	printf("arg4: %f\n", CmdLine.arg4);
 
 	return 0;
 }

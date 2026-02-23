@@ -15,27 +15,30 @@
 #include <cmath>
 #include <cctype>
 
-#define DEFINE_CMDLINE_ARG(Type, Name, CmdLineArg, bNextValue) \
+#define DEFINE_CMDLINE_ARG(Type, Name, CmdLineArg, bNextValue)		\
 Type Name;
 
-#define DEFINE_TRANSLATOR_ARG(Type, Name, CmdLineArg, bNextValue)												\
-Arg Name = Arg{																									\
-.CmdLine = CmdLineArg,																							\
-.bUseNextValue = bNextValue,																					\
-.Offset = offsetof(CmdLine, Name),																				\
-.Size = sizeof(Type),																							\
+#define DEFINE_TRANSLATOR_ARG(Type, Name, CmdLineArg, bNextValue)	\
+Arg Name = Arg{														\
+.CmdLine = CmdLineArg,												\
+.bUseNextValue = bNextValue,										\
+.Offset = offsetof(CmdLine, Name),									\
+.Size = sizeof(Type),												\
 .Parse = Parse<Type>\
 };
 
-#define DEFINE_CMDLINE()													\
-struct CmdLine																\
-{																			\
-DEFINE_CMDLINE_FIELDS(DEFINE_CMDLINE_ARG);									\
-};																			\
-constexpr struct															\
-{																			\
-DEFINE_CMDLINE_FIELDS(DEFINE_TRANSLATOR_ARG);								\
+#define DEFINE_CMDLINE(CmdLineName)									\
+struct CmdLine														\
+{																	\
+DEFINE_CMDLINE_FIELDS(DEFINE_CMDLINE_ARG);							\
+}CmdLineName{};														\
+constexpr struct													\
+{																	\
+DEFINE_CMDLINE_FIELDS(DEFINE_TRANSLATOR_ARG);						\
 }Translator{};
+
+#define PARSE_CMDLINE(CmdLine, argc, argv)							\
+(ParseCmdLine(argc, argv, &CmdLine, sizeof(CmdLine), &Translator, sizeof(Translator)))
 
 // case insensitive
 bool StartsWith(char* String, const char* Pattern)
