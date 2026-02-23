@@ -22,13 +22,13 @@ Type Name;
 Arg Name = Arg{														\
 .CmdLine = CmdLineArg,												\
 .bUseNextValue = bNextValue,										\
-.Offset = offsetof(CmdLine, Name),									\
+.Offset = offsetof(CmdLine_struct, Name),							\
 .Size = sizeof(Type),												\
 .Parse = Parse<Type>\
 };
 
 #define DEFINE_CMDLINE(CmdLineName)									\
-struct CmdLineName##Struct											\
+struct CmdLine_struct												\
 {																	\
 DEFINE_CMDLINE_FIELDS(DEFINE_CMDLINE_ARG);							\
 }CmdLineName{};														\
