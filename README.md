@@ -1,6 +1,9 @@
 # CmdLineParser
 Lightweight commandline parser single-header library in C++
 
+# TODO
+- Add option for default value
+
 # How to use
 
 1. Define `DEFINE_CMDLINE_FIELDS` macro with the corresponding fields for your command line arguments:
