@@ -1,7 +1,7 @@
 /*
 	CmdLineParser.h - lightweight commandline parser single-header library in C++
 
-	Copyright (c) 2026 Max Müller
+	Copyright (c) 2026 Max MÃ¼ller
 	https://github.com/max8447/CmdLineParser
 
 	MIT License
@@ -24,7 +24,7 @@ Arg Name = Arg{														\
 .bUseNextValue = bNextValue,										\
 .Offset = offsetof(CmdLine_struct, Name),							\
 .Size = sizeof(Type),												\
-.Parse = Parse<Type>\
+.Parse = Parse<Type>                                                \
 };
 
 #define DEFINE_CMDLINE(CmdLineName)									\
@@ -38,7 +38,7 @@ DEFINE_CMDLINE_FIELDS(DEFINE_TRANSLATOR_ARG);						\
 }Translator{};
 
 #define PARSE_CMDLINE(CmdLine, argc, argv)							\
-(ParseCmdLine(argc, argv, &CmdLine, sizeof(CmdLine), &Translator, sizeof(Translator)))
+(ParseCmdLine(argc, argv, &(CmdLine), sizeof(CmdLine), &(Translator), sizeof(Translator)))
 
 // case insensitive
 bool StartsWith(char* String, const char* Pattern)
@@ -99,6 +99,8 @@ void* Parse(char* CmdLineArg, char* OptionalArg)
 			ToSkip = 1;
 		}
 
+		// the following only works on little endian
+		
 		if constexpr (std::is_unsigned_v<Type>)
 		{
 			ReturnValue = new unsigned long long(strtoull(CmdLineArg + ToSkip, nullptr, Base));
