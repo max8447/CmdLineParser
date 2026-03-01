@@ -40,7 +40,7 @@ Parameters:<br>
 `argv`: Pointer to arguments (passed to `main` by argv)<br>
 
 Return value:<br>
-`true` on success, `false` on failure (failures only happen when a commandline arg is flagged to use the next arg as the value but there is no next arg).<br>
+`true` on success, `false` on failure (failures only happen when a commandline arg is flagged to use the next arg as the value but there is no next arg, or if we aren't on little-endian).<br>
 
 See [Example.cpp](https://github.com/max8447/CmdLineParser/blob/main/Example.cpp) for a ready-to-use solution.
 

@@ -15,30 +15,44 @@
 #include <cmath>
 #include <cctype>
 
+#ifdef __cpp_if_constexpr
+#define CLP_IF_CONSTEXPR constexpr
+#else
+#define CLP_IF_CONSTEXPR
+#endif
+
 #define DEFINE_CMDLINE_ARG(Type, Name, CmdLineArg, bNextValue)		\
 Type Name;
 
 #define DEFINE_TRANSLATOR_ARG(Type, Name, CmdLineArg, bNextValue)	\
-Arg Name = Arg{														\
-.CmdLine = CmdLineArg,												\
-.bUseNextValue = bNextValue,										\
-.Offset = offsetof(CmdLine_struct, Name),							\
-.Size = sizeof(Type),												\
-.Parse = Parse<Type>                                                \
-};
+Arg Name = Arg(														\
+CmdLineArg,															\
+bNextValue,															\
+offsetof(CmdLine_struct, Name),										\
+sizeof(Type),														\
+Parse<Type>															\
+);
 
 #define DEFINE_CMDLINE(CmdLineName)									\
 struct CmdLine_struct												\
 {																	\
 DEFINE_CMDLINE_FIELDS(DEFINE_CMDLINE_ARG);							\
 }CmdLineName{};														\
-constexpr struct													\
+struct																\
 {																	\
 DEFINE_CMDLINE_FIELDS(DEFINE_TRANSLATOR_ARG);						\
-}Translator{};
+}Translator;
 
 #define PARSE_CMDLINE(CmdLine, argc, argv)							\
 (ParseCmdLine(argc, argv, &(CmdLine), sizeof(CmdLine), &(Translator), sizeof(Translator)))
+
+// you never know
+bool IsUsingLittleEndian()
+{
+	unsigned short Test = 0x0001;
+
+	return *(unsigned char*)&Test == 0x01;
+}
 
 // case insensitive
 bool StartsWith(char* String, const char* Pattern)
@@ -78,7 +92,7 @@ void* Parse(char* CmdLineArg, char* OptionalArg)
 {
 	void* ReturnValue = nullptr;
 
-	if constexpr (std::_Is_nonbool_integral<Type>)
+	if CLP_IF_CONSTEXPR (std::is_integral<Type>::value && !std::is_same<typename std::remove_cv<Type>::type, bool>::value)
 	{
 		int Base = 10;
 		int ToSkip = 0;
@@ -98,19 +112,17 @@ void* Parse(char* CmdLineArg, char* OptionalArg)
 			Base = 8;
 			ToSkip = 1;
 		}
-
-		// the following only works on little endian
 		
-		if constexpr (std::is_unsigned_v<Type>)
+		if CLP_IF_CONSTEXPR (std::is_unsigned<Type>::value)
 		{
 			ReturnValue = new unsigned long long(strtoull(CmdLineArg + ToSkip, nullptr, Base));
 		}
-		else if constexpr (std::is_signed_v<Type>)
+		else if CLP_IF_CONSTEXPR (std::is_signed<Type>::value)
 		{
 			ReturnValue = new long long(strtoll(CmdLineArg + ToSkip, nullptr, Base));
 		}
 	}
-	else if constexpr (std::is_same_v<Type, bool>)
+	else if CLP_IF_CONSTEXPR (std::is_same<Type, bool>::value)
 	{
 		ReturnValue = new bool(!!strtol(CmdLineArg, nullptr, 10) /* || strstr?? */);
 
@@ -119,25 +131,25 @@ void* Parse(char* CmdLineArg, char* OptionalArg)
 			*(bool*)ReturnValue = true;
 		}
 	}
-	else if constexpr (std::is_same_v<Type, float>)
+	else if CLP_IF_CONSTEXPR (std::is_same<Type, float>::value)
 	{
 		ReturnValue = new float(strtof(CmdLineArg, nullptr));
 	}
-	else if constexpr (std::is_same_v<Type, double>)
+	else if CLP_IF_CONSTEXPR (std::is_same<Type, double>::value)
 	{
 		ReturnValue = new double(strtod(CmdLineArg, nullptr));
 	}
-	else if constexpr (std::is_same_v<Type, long double>)
+	else if CLP_IF_CONSTEXPR (std::is_same<Type, long double>::value)
 	{
 		ReturnValue = new long double(strtold(CmdLineArg, nullptr));
 	}
-	else if constexpr (std::is_pointer_v<Type>)
+	else if CLP_IF_CONSTEXPR (std::is_pointer<Type>::value)
 	{
-		if constexpr (std::is_same_v<std::remove_const_t<std::remove_pointer_t<Type>>, char>)
+		if CLP_IF_CONSTEXPR (std::is_same<typename std::remove_const<typename std::remove_pointer<Type>::type>::type, char>::value)
 		{
 			ReturnValue = new char* (_strdup(CmdLineArg));
 		}
-		else if constexpr (std::is_same_v<std::remove_const_t<std::remove_pointer_t<Type>>, wchar_t>)
+		else if CLP_IF_CONSTEXPR (std::is_same<typename std::remove_const<typename std::remove_pointer<Type>::type>::type, wchar_t>::value)
 		{
 			ReturnValue = new wchar_t* (NCStrToWCStr(CmdLineArg));
 		}
@@ -153,10 +165,25 @@ struct Arg
 	int Offset;
 	int Size;
 	void* (*Parse)(char* CmdLineArg, char* OptionalArg);
+
+	inline Arg(const char* InCmdLine, bool InbUseNextValue, int InOffset, int InSize, void* (*InParse)(char* CmdLineArg, char* OptionalArg))
+		: CmdLine(InCmdLine)
+		, bUseNextValue(InbUseNextValue)
+		, Offset(InOffset)
+		, Size(InSize)
+		, Parse(InParse)
+	{
+	}
 };
 
 bool ParseCmdLine(int argc, char** argv, void* CmdLine, size_t SizeOfCmdLine, const void* Translator, size_t SizeOfTranslator)
 {
+	if (!IsUsingLittleEndian())
+	{
+		// only support little endian because we don't copy all bytes of integrals
+		return false;
+	}
+
 	if (!CmdLine || !Translator)
 	{
 		return false;
@@ -166,7 +193,7 @@ bool ParseCmdLine(int argc, char** argv, void* CmdLine, size_t SizeOfCmdLine, co
 
 	if (argc <= 1) // there should always be one, but just in case the user emits the first arg
 	{
-		return false;
+		return true; // return true because this technically isn't a fail case (program should handle case where user doesn't use any args)
 	}
 
 	for (int i = 0; i < argc; i++)
